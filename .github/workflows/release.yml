@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: Generate Changelog
-        run: npx changeloggy --since last-tag --output CHANGELOG.md
+        run: npx oh-my-changeloggy --since last-tag --output CHANGELOG.md
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
