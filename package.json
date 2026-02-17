@@ -1,18 +1,45 @@
 {
   "name": "pkg-tui",
-  "module": "src/index.tsx",
+  "version": "1.0.0",
+  "description": "Interactive terminal UI for managing JavaScript/TypeScript dependencies",
   "type": "module",
-  "private": true,
+  "bin": {
+    "pkg-tui": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun --minify",
+    "compile": "bun build --compile --outfile=pkg-tui src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "cli",
+    "tui",
+    "dependencies",
+    "package-manager",
+    "npm",
+    "yarn",
+    "pnpm",
+    "bun",
+    "interactive",
+    "terminal"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@opentui/core": "^0.1.80",
+    "semver": "^7.6.3",
+    "unicode-animations": "^1.0.3"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/semver": "^7.5.8",
+    "typescript": "^5.7.3"
   },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "@opentui/core": "^0.1.79"
+  "engines": {
+    "bun": ">=1.0.0"
   }
 }
