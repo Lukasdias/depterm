@@ -1,6 +1,6 @@
 {
   "name": "depterm",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Terminal UI for managing JavaScript/TypeScript dependencies",
   "module": "dist/index.js",
   "type": "module",
