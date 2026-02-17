@@ -61,7 +61,6 @@ export function createRightPanel(): BoxRenderable {
     id: "right-panel-overview",
     flexDirection: "column",
     padding: 1,
-    height: "40%",
   });
 
   overview.add(
@@ -148,7 +147,7 @@ export function createRightPanel(): BoxRenderable {
   if (isLoadingMetadata) {
     metadataSection.add(
       new TextRenderable(renderer, {
-        content: "⏳ Loading package metadata...",
+        content: "⟳ Loading...",
         fg: colors.yellow[300],
         attributes: TextAttributes.DIM,
       })
@@ -171,7 +170,7 @@ export function createRightPanel(): BoxRenderable {
     if (author) {
       metadataSection.add(
         new TextRenderable(renderer, {
-          content: `👤 ${author}`,
+          content: `Author: ${author}`,
           fg: colors.yellow[300],
         })
       );
@@ -180,7 +179,7 @@ export function createRightPanel(): BoxRenderable {
     if (metadata.license) {
       metadataSection.add(
         new TextRenderable(renderer, {
-          content: `📄 ${metadata.license}`,
+          content: `License: ${metadata.license}`,
           fg: colors.yellow[300],
         })
       );
@@ -190,7 +189,7 @@ export function createRightPanel(): BoxRenderable {
       const homepage = metadata.homepage.replace(/^https?:\/\//, "").slice(0, 40);
       metadataSection.add(
         new TextRenderable(renderer, {
-          content: `🔗 ${homepage}${metadata.homepage.length > 40 ? "..." : ""}`,
+          content: `Homepage: ${homepage}${metadata.homepage.length > 40 ? "..." : ""}`,
           fg: colors.yellow[300],
           attributes: TextAttributes.DIM,
         })
@@ -199,7 +198,7 @@ export function createRightPanel(): BoxRenderable {
   } else {
     metadataSection.add(
       new TextRenderable(renderer, {
-        content: "ℹ️ No metadata available",
+        content: "No metadata available",
         fg: colors.yellow[400],
         attributes: TextAttributes.DIM,
       })
@@ -216,7 +215,6 @@ export function createRightPanel(): BoxRenderable {
     id: "right-panel-conflicts",
     flexDirection: "column",
     padding: 1,
-    height: "25%",
     border: true,
     borderColor: colors.yellow[300],
   });
@@ -258,76 +256,13 @@ export function createRightPanel(): BoxRenderable {
   } else {
     conflictsSection.add(
       new TextRenderable(renderer, {
-        content: "✓ No conflicts for this package",
+        content: "No conflicts",
         fg: colors.yellow[100],
       })
     );
   }
 
   panel.add(conflictsSection);
-
-  const actionsSection = new BoxRenderable(renderer, {
-    id: "right-panel-actions",
-    flexDirection: "column",
-    padding: 1,
-    flexGrow: 1,
-  });
-
-  actionsSection.add(
-    new TextRenderable(renderer, {
-      content: `ACTIONS ${state.focusMode === "action" ? "(Active)" : "(Tab to focus)"}`,
-      attributes: TextAttributes.BOLD,
-      fg: colors.yellow[200],
-    })
-  );
-  actionsSection.add(new TextRenderable(renderer, { content: "" }));
-  actionsSection.add(
-    new TextRenderable(renderer, {
-      content: "  [P] Patch       Bug fixes only",
-      fg: colors.yellow[200],
-    })
-  );
-  actionsSection.add(
-    new TextRenderable(renderer, {
-      content: "  [M] Minor       New features",
-      fg: colors.yellow[200],
-    })
-  );
-
-  const majorAction = new TextRenderable(renderer, {
-    content: outdatedInfo?.type === "major" && state.safeMode
-      ? "  [J] Major       Breaking changes [BLOCKED]"
-      : "  [J] Major       Breaking changes",
-    fg: outdatedInfo?.type === "major" && state.safeMode ? colors.yellow[500] : colors.status.major,
-    attributes: outdatedInfo?.type === "major" && state.safeMode ? TextAttributes.DIM : TextAttributes.NONE,
-  });
-  actionsSection.add(majorAction);
-
-  actionsSection.add(
-    new TextRenderable(renderer, {
-      content: "  [L] Latest      Latest available",
-      fg: colors.yellow[100],
-    })
-  );
-  actionsSection.add(
-    new TextRenderable(renderer, {
-      content: "  [D] Dry Run     Preview changes",
-      fg: colors.yellow[300],
-    })
-  );
-
-  if (state.safeMode && outdatedInfo?.type === "major") {
-    actionsSection.add(new TextRenderable(renderer, { content: "" }));
-    actionsSection.add(
-      new TextRenderable(renderer, {
-        content: "Safe Mode: Major upgrades blocked",
-        fg: colors.yellow[200],
-        attributes: TextAttributes.DIM,
-      })
-    );
-  }
-
-  panel.add(actionsSection);
 
   return panel;
 }

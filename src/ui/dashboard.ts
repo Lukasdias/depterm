@@ -4,12 +4,20 @@ import { createHeader } from "./components/header.js";
 import { createLeftPanel } from "./components/left-panel.js";
 import { createRightPanel } from "./components/right-panel.js";
 import { createFooter } from "./components/footer.js";
+import { createActionDialog } from "./components/action-dialog.js";
 
 let dashboardContainer: BoxRenderable | null = null;
+let dialogContainer: BoxRenderable | null = null;
 
 export function renderDashboard(): void {
   if (dashboardContainer) {
     dashboardContainer.destroy();
+    dashboardContainer = null;
+  }
+
+  if (dialogContainer) {
+    dialogContainer.destroy();
+    dialogContainer = null;
   }
 
   dashboardContainer = new BoxRenderable(renderer, {
@@ -47,6 +55,11 @@ export function renderDashboard(): void {
   dashboardContainer.add(createFooter());
 
   renderer.root.add(dashboardContainer);
+
+  if (state.actionDialog.isOpen) {
+    dialogContainer = createActionDialog();
+    renderer.root.add(dialogContainer);
+  }
 }
 
 export { state, renderer } from "./state.js";

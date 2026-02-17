@@ -89,7 +89,8 @@ src/
 │       ├── header.ts
 │       ├── left-panel.ts
 │       ├── right-panel.ts
-│       └── footer.ts
+│       ├── footer.ts
+│       └── action-dialog.ts
 ├── types/
 │   └── index.ts
 └── index.ts        # Entry point

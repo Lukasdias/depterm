@@ -1,6 +1,7 @@
 import { BoxRenderable, TextRenderable, TextAttributes } from "@opentui/core";
 import { renderer, state } from "../state.js";
 import { colors } from "../colors.js";
+import { createSpinner, stopSpinner } from "../spinner.js";
 import type { Dependency } from "../../types/index.js";
 
 function getPackageStatus(pkg: Dependency) {
@@ -66,6 +67,20 @@ export function createLeftPanel(): BoxRenderable {
     border: true,
     borderColor: colors.ui.border,
   });
+
+  if (state.isLoading) {
+    const loadingState = new BoxRenderable(renderer, {
+      flexDirection: "column",
+      flexGrow: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    });
+    createSpinner("left-panel-loading", loadingState, "helix", "Loading dependencies...", colors.yellow[300]);
+    panel.add(loadingState);
+    return panel;
+  } else {
+    stopSpinner("left-panel-loading");
+  }
 
   const headerRow = new BoxRenderable(renderer, {
     id: "left-panel-header",

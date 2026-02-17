@@ -45,17 +45,13 @@ bunx depterm
 
 ## Controls
 
-### Dashboard
-
 | Key | Action |
 |-----|--------|
 | `↑` / `↓` | Navigate packages |
-| `Tab` | Switch to action mode |
-| `P` | Patch upgrade (in action mode) |
-| `M` | Minor upgrade (in action mode) |
-| `J` | Major upgrade (in action mode) |
-| `L` | Latest upgrade (in action mode) |
-| `D` | Dry run (in action mode) |
+| `Enter` | Open upgrade dialog |
+| `Esc` | Close dialog |
+| `↑` / `↓` | Navigate dialog options |
+| `Enter` | Confirm upgrade |
 | `R` | Refresh package data |
 | `S` | Toggle safe mode |
 | `Q` | Quit |

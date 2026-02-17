@@ -4,6 +4,12 @@ import type { PackageMetadata } from "../core/package-info.js";
 
 export const renderer: CliRenderer = await createCliRenderer({ exitOnCtrlC: true });
 
+export type ActionDialogState = {
+  isOpen: boolean;
+  selectedIndex: number;
+  isUpgrading: boolean;
+};
+
 export const state = {
   dependencies: [] as Dependency[],
   outdated: [] as OutdatedInfo[],
@@ -16,6 +22,11 @@ export const state = {
   focusMode: "list" as "list" | "action",
   packageMetadata: new Map<string, PackageMetadata>(),
   metadataLoading: new Set<string>(),
+  actionDialog: {
+    isOpen: false,
+    selectedIndex: 0,
+    isUpgrading: false,
+  } as ActionDialogState,
 };
 
 export function truncatePath(path: string, maxLength: number): string {
