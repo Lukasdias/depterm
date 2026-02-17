@@ -5,7 +5,7 @@ import { readPackageJson, extractDependencies } from "./core/read-package.js";
 import { getOutdatedPackages } from "./core/outdated.js";
 import { checkConflicts } from "./core/conflicts.js";
 import { fetchPackageMetadata } from "./core/package-info.js";
-import { upgradePackage, getTargetVersion } from "./core/upgrade.js";
+import { upgradePackage } from "./core/upgrade.js";
 
 renderer.keyInput.on("keypress", (key) => {
   if (key.name === "f12") {
@@ -79,102 +79,139 @@ renderer.keyInput.on("keypress", async (key) => {
     const outdatedInfo = state.outdated.find(
       (o) => o.name === selectedDep?.name,
     );
-
-    const maxIndex = outdatedInfo ? 4 : 1;
+    const isBatchMode = state.selectedPackages.size > 0;
+    const maxIndex = 2;
 
     if (keyName === "up") {
-      state.actionDialog.selectedIndex = Math.max(
-        0,
-        state.actionDialog.selectedIndex - 1,
-      );
+      state.actionDialog.selectedIndex = Math.max(0, state.actionDialog.selectedIndex - 1);
       renderDashboard();
     } else if (keyName === "down") {
-      state.actionDialog.selectedIndex = Math.min(
-        maxIndex,
-        state.actionDialog.selectedIndex + 1,
-      );
+      state.actionDialog.selectedIndex = Math.min(maxIndex, state.actionDialog.selectedIndex + 1);
       renderDashboard();
-    } else if (keyName === "1") {
+    } else if (keyName === "w") {
       state.actionDialog.selectedIndex = 0;
       renderDashboard();
-    } else if (keyName === "2") {
+    } else if (keyName === "l") {
       state.actionDialog.selectedIndex = 1;
       renderDashboard();
-    } else if (keyName === "3") {
-      state.actionDialog.selectedIndex = 2;
-      renderDashboard();
-    } else if (keyName === "4") {
-      state.actionDialog.selectedIndex = 3;
-      renderDashboard();
     } else if (keyName === "d") {
-      state.actionDialog.selectedIndex = maxIndex;
+      state.actionDialog.selectedIndex = 2;
       renderDashboard();
     } else if (keyName === "s") {
       state.safeMode = !state.safeMode;
       renderDashboard();
     } else if (keyName === "enter" || keyName === "return") {
       const idx = state.actionDialog.selectedIndex;
+      const isLatest = idx === 1;
+      const isDryRun = idx === 2;
+
+      if (isLatest && state.safeMode) {
+        return;
+      }
+
+      state.actionDialog.isUpgrading = true;
+      renderDashboard();
+
+      let success = true;
       
-      if (!outdatedInfo || idx === 4) {
+      if (isBatchMode) {
+        const batchPackages = state.dependencies.filter(d => state.selectedPackages.has(d.name));
+        const batchOutdated = state.outdated.filter(o => state.selectedPackages.has(o.name));
+
+        for (const pkg of batchPackages) {
+          const outdated = batchOutdated.find(o => o.name === pkg.name);
+          if (!outdated && !isDryRun) continue;
+
+          const target = isLatest ? outdated?.latest : outdated?.wanted || pkg.currentVersion;
+          const result = await upgradePackage(
+            state.packageManager,
+            {
+              name: pkg.name,
+              current: pkg.currentVersion,
+              type: isLatest ? "latest" : "wanted",
+              target: target || "latest",
+            },
+            { safeMode: state.safeMode, dryRun: isDryRun },
+            state.projectPath,
+          );
+          if (!result.success) success = false;
+        }
+      } else {
         const target = outdatedInfo?.latest || selectedDep?.currentVersion || "latest";
         const result = await upgradePackage(
           state.packageManager,
           {
             name: selectedDep.name,
             current: selectedDep.currentVersion,
-            type: "latest",
-            target,
+            type: isLatest ? "latest" : "wanted",
+            target: isLatest ? outdatedInfo!.latest : outdatedInfo?.wanted || target,
           },
-          { safeMode: state.safeMode, dryRun: true },
+          { safeMode: state.safeMode, dryRun: isDryRun },
           state.projectPath,
         );
-        console.log(result.message);
-        if (result.output) console.log(result.output);
-        state.actionDialog.isOpen = false;
-        renderDashboard();
-        return;
+        success = result.success;
       }
 
-      const types: ("patch" | "minor" | "major" | "latest")[] = ["patch", "minor", "major", "latest"];
-      const actionType = types[idx];
-
-      if (actionType === "major" && state.safeMode) {
-        return;
-      }
-
-      const target = getTargetVersion(
-        selectedDep.currentVersion,
-        outdatedInfo.wanted,
-        outdatedInfo.latest,
-        actionType,
-      );
-
-      state.actionDialog.isUpgrading = true;
-      renderDashboard();
-
-      const result = await upgradePackage(
-        state.packageManager,
-        {
-          name: selectedDep.name,
-          current: selectedDep.currentVersion,
-          type: actionType,
-          target,
-        },
-        { safeMode: state.safeMode, dryRun: false },
-        state.projectPath,
-      );
-
-      console.log(result.message);
-      if (result.output) console.log(result.output);
-
-      if (result.success) {
-        loadData();
-      }
-
-      state.actionDialog.isOpen = false;
       state.actionDialog.isUpgrading = false;
+      state.actionDialog.isOpen = false;
+      state.actionDialog.selectedIndex = 0;
+      state.selectedPackages.clear();
+
+      if (success && !isDryRun) {
+        loadData();
+      } else {
+        renderDashboard();
+      }
+    }
+    return;
+  }
+
+  if (state.filter.isActive) {
+    if (keyName === "escape") {
+      state.filter.isActive = false;
+      state.filter.query = "";
+      state.selectedIndex = 0;
+      renderDashboard();
+      return;
+    }
+    
+    if (keyName === "enter" || keyName === "return") {
+      state.filter.isActive = false;
+      renderDashboard();
+      return;
+    }
+    
+    if (keyName === "backspace") {
+      state.filter.query = state.filter.query.slice(0, -1);
+      state.selectedIndex = 0;
+      renderDashboard();
+      return;
+    }
+    
+    if (key.name && key.name.length === 1 && /[a-zA-Z0-9\-_]/.test(key.name)) {
+      state.filter.query += key.name;
+      state.selectedIndex = 0;
+      renderDashboard();
+      return;
+    }
+    
+    if (keyName === "up") {
+      state.selectedIndex = Math.max(0, state.selectedIndex - 1);
+      renderDashboard();
+    } else if (keyName === "down") {
+      const filteredCount = state.dependencies.filter(d => 
+        d.name.toLowerCase().includes(state.filter.query.toLowerCase())
+      ).length;
+      state.selectedIndex = Math.min(filteredCount - 1, state.selectedIndex + 1);
       renderDashboard();
     }
+    return;
+  }
+
+  if (keyName === "/") {
+    state.filter.isActive = true;
+    state.filter.query = "";
+    renderDashboard();
     return;
   }
 
@@ -183,23 +220,65 @@ renderer.keyInput.on("keypress", async (key) => {
     renderDashboard();
     loadSelectedPackageMetadata();
   } else if (keyName === "down") {
+    const filteredDeps = state.filter.query
+      ? state.dependencies.filter(d => 
+          d.name.toLowerCase().includes(state.filter.query.toLowerCase())
+        )
+      : state.dependencies;
     state.selectedIndex = Math.min(
-      state.dependencies.length - 1,
+      filteredDeps.length - 1,
       state.selectedIndex + 1,
     );
     renderDashboard();
     loadSelectedPackageMetadata();
   } else if (keyName === "enter" || keyName === "return") {
-    const selectedDep = state.dependencies[state.selectedIndex];
+    const filteredDeps = state.filter.query
+      ? state.dependencies.filter(d => 
+          d.name.toLowerCase().includes(state.filter.query.toLowerCase())
+        )
+      : state.dependencies;
+    const selectedDep = filteredDeps[state.selectedIndex];
     if (selectedDep) {
       state.actionDialog.isOpen = true;
       state.actionDialog.selectedIndex = 0;
+      state.filter.isActive = false;
+      state.filter.query = "";
       renderDashboard();
     }
   } else if (keyName === "r") {
     loadData();
   } else if (keyName === "s") {
     state.safeMode = !state.safeMode;
+    renderDashboard();
+  } else if (keyName === "space" || keyName === " ") {
+    const filteredDeps = state.filter.query
+      ? state.dependencies.filter(d => 
+          d.name.toLowerCase().includes(state.filter.query.toLowerCase())
+        )
+      : state.dependencies;
+    const currentPkg = filteredDeps[state.selectedIndex];
+    if (currentPkg) {
+      if (state.selectedPackages.has(currentPkg.name)) {
+        state.selectedPackages.delete(currentPkg.name);
+      } else {
+        state.selectedPackages.add(currentPkg.name);
+      }
+      renderDashboard();
+    }
+  } else if (keyName === "a") {
+    const outdatedNames = state.outdated.map(o => o.name);
+    for (const name of outdatedNames) {
+      state.selectedPackages.add(name);
+    }
+    renderDashboard();
+  } else if (keyName === "c") {
+    state.selectedPackages.clear();
+    renderDashboard();
+  } else if (keyName === "b" && state.selectedPackages.size > 0) {
+    state.actionDialog.isOpen = true;
+    state.actionDialog.selectedIndex = 0;
+    state.filter.isActive = false;
+    state.filter.query = "";
     renderDashboard();
   }
 });

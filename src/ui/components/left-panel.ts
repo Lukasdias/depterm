@@ -56,8 +56,15 @@ function getPackageStatus(pkg: Dependency) {
 export function createLeftPanel(): BoxRenderable {
   const terminalHeight = process.stdout.rows || 24;
   const visibleItems = Math.max(terminalHeight - 12, 8);
-  const startIndex = Math.max(0, state.selectedIndex - Math.floor(visibleItems / 2));
-  const visibleDeps = state.dependencies.slice(startIndex, startIndex + visibleItems);
+  
+  const filteredDeps = state.filter.isActive && state.filter.query
+    ? state.dependencies.filter(d => 
+        d.name.toLowerCase().includes(state.filter.query.toLowerCase())
+      )
+    : state.dependencies;
+  
+  const startIndex = Math.max(0, Math.min(state.selectedIndex, filteredDeps.length - 1) - Math.floor(visibleItems / 2));
+  const visibleDeps = filteredDeps.slice(startIndex, startIndex + visibleItems);
 
   const panel = new BoxRenderable(renderer, {
     id: "left-panel",
@@ -80,6 +87,23 @@ export function createLeftPanel(): BoxRenderable {
     return panel;
   } else {
     stopSpinner("left-panel-loading");
+  }
+
+  if (state.filter.isActive) {
+    const filterBar = new BoxRenderable(renderer, {
+      flexDirection: "row",
+      padding: 1,
+      border: true,
+      borderColor: colors.yellow[200],
+    });
+    filterBar.add(
+      new TextRenderable(renderer, {
+        content: `Search: ${state.filter.query}_`,
+        fg: colors.yellow[100],
+        attributes: TextAttributes.BOLD,
+      })
+    );
+    panel.add(filterBar);
   }
 
   const headerRow = new BoxRenderable(renderer, {
@@ -132,11 +156,14 @@ export function createLeftPanel(): BoxRenderable {
     flexGrow: 1,
   });
 
+  const actualSelectedIndex = Math.min(state.selectedIndex, filteredDeps.length - 1);
+
   for (let i = 0; i < visibleDeps.length; i++) {
     const pkg = visibleDeps[i];
     const actualIndex = startIndex + i;
-    const isSelected = actualIndex === state.selectedIndex;
+    const isSelected = actualIndex === actualSelectedIndex;
     const status = getPackageStatus(pkg);
+    const isPackageSelected = state.selectedPackages.has(pkg.name);
 
     const row = new BoxRenderable(renderer, {
       id: `pkg-row-${pkg.name}`,
@@ -145,7 +172,17 @@ export function createLeftPanel(): BoxRenderable {
       backgroundColor: isSelected ? colors.ui.selection : undefined,
     });
 
-    const nameCell = new BoxRenderable(renderer, { width: "60%" });
+    const checkboxCell = new BoxRenderable(renderer, { width: "5%" });
+    checkboxCell.add(
+      new TextRenderable(renderer, {
+        content: isPackageSelected ? "[x]" : "[ ]",
+        fg: isPackageSelected ? colors.yellow[100] : colors.yellow[400],
+        attributes: TextAttributes.DIM,
+      })
+    );
+    row.add(checkboxCell);
+
+    const nameCell = new BoxRenderable(renderer, { width: "55%" });
     nameCell.add(
       new TextRenderable(renderer, {
         content: `${isSelected ? "> " : "  "}${pkg.name}`,
@@ -191,7 +228,7 @@ export function createLeftPanel(): BoxRenderable {
 
   panel.add(listContainer);
 
-  if (state.dependencies.length > 0) {
+  if (filteredDeps.length > 0 || state.filter.isActive || state.selectedPackages.size > 0) {
     const footer = new BoxRenderable(renderer, {
       id: "left-panel-footer",
       flexDirection: "row",
@@ -199,9 +236,19 @@ export function createLeftPanel(): BoxRenderable {
       border: true,
       borderColor: colors.yellow[300],
     });
+    
+    let footerText = "";
+    if (state.selectedPackages.size > 0) {
+      footerText = `${state.selectedPackages.size} selected | Space to toggle | a all | c clear`;
+    } else if (state.filter.isActive) {
+      footerText = `Filtered: ${filteredDeps.length}/${state.dependencies.length} | Press Esc to clear`;
+    } else {
+      footerText = `${state.selectedIndex + 1}/${state.dependencies.length} | Space select | / filter`;
+    }
+    
     footer.add(
       new TextRenderable(renderer, {
-        content: `${state.selectedIndex + 1}/${state.dependencies.length} | ${visibleDeps.length} visible | ${state.dependencies.length - state.outdated.length} OK | ${state.outdated.length} update`,
+        content: footerText,
         attributes: TextAttributes.DIM,
         fg: colors.yellow[400],
       })

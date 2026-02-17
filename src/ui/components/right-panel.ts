@@ -2,6 +2,7 @@ import { BoxRenderable, TextRenderable, TextAttributes } from "@opentui/core";
 import { renderer, state } from "../state.js";
 import { colors, getUpdateTypeColor } from "../colors.js";
 import { formatAuthor } from "../../core/package-info.js";
+import { createSpinner, stopSpinner } from "../spinner.js";
 
 function wrapText(text: string, maxWidth: number): string[] {
   if (text.length <= maxWidth) return [text];
@@ -145,64 +146,62 @@ export function createRightPanel(): BoxRenderable {
   metadataSection.add(new TextRenderable(renderer, { content: "" }));
 
   if (isLoadingMetadata) {
-    metadataSection.add(
-      new TextRenderable(renderer, {
-        content: "⟳ Loading...",
-        fg: colors.yellow[300],
-        attributes: TextAttributes.DIM,
-      })
-    );
-  } else if (metadata) {
-    if (metadata.description) {
-      const descLines = wrapText(metadata.description, 50);
-      for (const line of descLines) {
+    createSpinner("right-panel-loading", metadataSection, "helix", "Loading...", colors.yellow[300]);
+  } else {
+    stopSpinner("right-panel-loading");
+    
+    if (metadata) {
+      if (metadata.description) {
+        const descLines = wrapText(metadata.description, 50);
+        for (const line of descLines) {
+          metadataSection.add(
+            new TextRenderable(renderer, {
+              content: line,
+              fg: colors.yellow[100],
+            })
+          );
+        }
+        metadataSection.add(new TextRenderable(renderer, { content: "" }));
+      }
+
+      const author = formatAuthor(metadata.author);
+      if (author) {
         metadataSection.add(
           new TextRenderable(renderer, {
-            content: line,
-            fg: colors.yellow[100],
+            content: `Author: ${author}`,
+            fg: colors.yellow[300],
           })
         );
       }
-      metadataSection.add(new TextRenderable(renderer, { content: "" }));
-    }
 
-    const author = formatAuthor(metadata.author);
-    if (author) {
+      if (metadata.license) {
+        metadataSection.add(
+          new TextRenderable(renderer, {
+            content: `License: ${metadata.license}`,
+            fg: colors.yellow[300],
+          })
+        );
+      }
+
+      if (metadata.homepage) {
+        const homepage = metadata.homepage.replace(/^https?:\/\//, "").slice(0, 40);
+        metadataSection.add(
+          new TextRenderable(renderer, {
+            content: `Homepage: ${homepage}${metadata.homepage.length > 40 ? "..." : ""}`,
+            fg: colors.yellow[300],
+            attributes: TextAttributes.DIM,
+          })
+        );
+      }
+    } else {
       metadataSection.add(
         new TextRenderable(renderer, {
-          content: `Author: ${author}`,
-          fg: colors.yellow[300],
-        })
-      );
-    }
-
-    if (metadata.license) {
-      metadataSection.add(
-        new TextRenderable(renderer, {
-          content: `License: ${metadata.license}`,
-          fg: colors.yellow[300],
-        })
-      );
-    }
-
-    if (metadata.homepage) {
-      const homepage = metadata.homepage.replace(/^https?:\/\//, "").slice(0, 40);
-      metadataSection.add(
-        new TextRenderable(renderer, {
-          content: `Homepage: ${homepage}${metadata.homepage.length > 40 ? "..." : ""}`,
-          fg: colors.yellow[300],
+          content: "No metadata available",
+          fg: colors.yellow[400],
           attributes: TextAttributes.DIM,
         })
       );
     }
-  } else {
-    metadataSection.add(
-      new TextRenderable(renderer, {
-        content: "No metadata available",
-        fg: colors.yellow[400],
-        attributes: TextAttributes.DIM,
-      })
-    );
   }
 
   panel.add(metadataSection);

@@ -27,6 +27,11 @@ export const state = {
     selectedIndex: 0,
     isUpgrading: false,
   } as ActionDialogState,
+  filter: {
+    isActive: false,
+    query: "",
+  },
+  selectedPackages: new Set<string>(),
 };
 
 export function truncatePath(path: string, maxLength: number): string {

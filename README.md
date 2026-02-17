@@ -11,8 +11,10 @@ depterm provides a visual interface for managing project dependencies directly f
 - Package Manager Detection: bun, pnpm, yarn, or npm based on lockfile
 - Outdated Package Detection: shows available updates by semver type
 - Conflict Analysis: peer dependency issues and deprecated packages
-- Interactive Upgrades: keyboard shortcuts for navigation and upgrades
+- Interactive Upgrades: single or batch upgrades with keyboard shortcuts
 - Safe Mode: blocks major version upgrades by default
+- Search/Filter: quickly find packages by name
+- Package Info: npm metadata (description, author, license)
 
 ## Installation
 

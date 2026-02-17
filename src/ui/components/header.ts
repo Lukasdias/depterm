@@ -53,7 +53,19 @@ export function createHeader(): BoxRenderable {
 
   const rightSection = new BoxRenderable(renderer, {
     id: "header-right",
+    flexDirection: "row",
   });
+  
+  if (state.safeMode) {
+    rightSection.add(
+      new TextRenderable(renderer, {
+        content: "[SAFE] ",
+        fg: colors.yellow[300],
+        attributes: TextAttributes.DIM,
+      })
+    );
+  }
+  
   rightSection.add(
     new TextRenderable(renderer, {
       id: "header-stats",

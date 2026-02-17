@@ -18,13 +18,6 @@ export async function upgradePackage(
   options: UpgradeOptions = {},
   projectPath: string = process.cwd()
 ): Promise<UpgradeResult> {
-  if (options.safeMode && action.type === 'major') {
-    return {
-      success: false,
-      message: 'Major upgrade blocked in safe mode. Use --no-safe-mode to proceed.',
-    };
-  }
-
   try {
     let command: string[];
     

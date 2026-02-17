@@ -34,7 +34,7 @@ export interface UpgradeAction {
   name: string;
   current: string;
   target: string;
-  type: 'patch' | 'minor' | 'major' | 'latest';
+  type: 'patch' | 'minor' | 'major' | 'latest' | 'wanted';
 }
 
 export interface ExecutionLog {
