@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "dev": "bun run src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target bun --minify",
+    "build": "bun run build.ts",
     "compile": "bun build --compile --outfile=depterm src/index.ts",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
