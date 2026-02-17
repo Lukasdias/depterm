@@ -1,8 +1,8 @@
-# Agent Guidelines for pkg-tui
+# Agent Guidelines for depterm
 
 ## Project Overview
 
-pkg-tui is a terminal UI for managing JavaScript/TypeScript dependencies. It uses Bun runtime, OpenTUI for rendering, and TypeScript with strict mode.
+depterm is a terminal UI for managing JavaScript/TypeScript dependencies. It uses Bun runtime, OpenTUI for rendering, and TypeScript with strict mode.
 
 ## Commands
 

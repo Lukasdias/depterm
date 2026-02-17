@@ -1,10 +1,10 @@
-# pkg-tui
+# depterm
 
 Terminal UI for managing JavaScript/TypeScript dependencies.
 
 ## Overview
 
-pkg-tui provides a visual interface for managing project dependencies directly from the terminal. It detects package managers, identifies outdated packages, detects conflicts, and enables interactive upgrades.
+depterm provides a visual interface for managing project dependencies directly from the terminal. It detects package managers, identifies outdated packages, detects conflicts, and enables interactive upgrades.
 
 ## Features
 
@@ -18,29 +18,29 @@ pkg-tui provides a visual interface for managing project dependencies directly f
 
 ```bash
 # npm
-npm install -g pkg-tui
+npm install -g depterm
 
 # yarn
-yarn global add pkg-tui
+yarn global add depterm
 
 # pnpm
-pnpm add -g pkg-tui
+pnpm add -g depterm
 
 # bun
-bun add -g pkg-tui
+bun add -g depterm
 ```
 
 ## Usage
 
 ```bash
-pkg-tui
+depterm
 ```
 
 Or without installing:
 
 ```bash
-npx pkg-tui
-bunx pkg-tui
+npx depterm
+bunx depterm
 ```
 
 ## Controls
@@ -67,7 +67,7 @@ Enabled by default. Blocks major version upgrades. Press `S` to toggle.
 ## Architecture
 
 ```
-pkg-tui/
+depterm/
 ├── src/
 │   ├── core/           # Business logic
 │   │   ├── detect-manager.ts

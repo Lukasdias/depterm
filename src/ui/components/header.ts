@@ -25,7 +25,7 @@ export function createHeader(): BoxRenderable {
   leftSection.add(
     new TextRenderable(renderer, {
       id: "header-title",
-      content: "pkg-tui",
+      content: "depterm",
       attributes: TextAttributes.BOLD,
       fg: colors.yellow[200],
     })
