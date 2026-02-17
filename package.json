@@ -2,22 +2,39 @@
   "name": "depterm",
   "version": "1.0.0",
   "description": "Terminal UI for managing JavaScript/TypeScript dependencies",
+  "module": "dist/index.js",
   "type": "module",
+  "main": "dist/index.js",
   "bin": {
     "depterm": "./dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "dev": "bun run src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun --minify",
     "compile": "bun build --compile --outfile=depterm src/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "bun run clean && bun run build",
+    "release": "./scripts/release.sh"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Lukasdias/depterm.git"
+  },
+  "author": "Lukas Dias",
+  "bugs": {
+    "url": "https://github.com/Lukasdias/depterm/issues"
+  },
+  "homepage": "https://github.com/Lukasdias/depterm#readme",
   "keywords": [
     "cli",
     "tui",
+    "terminal",
     "dependencies",
     "package-manager",
     "npm",
@@ -25,9 +42,9 @@
     "pnpm",
     "bun",
     "interactive",
-    "terminal"
+    "upgrade",
+    "outdated"
   ],
-  "author": "",
   "license": "MIT",
   "dependencies": {
     "@opentui/core": "^0.1.80",

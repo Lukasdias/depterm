@@ -50,10 +50,13 @@ bunx depterm
 | Key | Action |
 |-----|--------|
 | `↑` / `↓` | Navigate packages |
+| `Space` | Toggle package selection |
+| `A` | Select all outdated packages |
+| `C` | Clear selection |
+| `B` | Batch upgrade selected packages |
 | `Enter` | Open upgrade dialog |
-| `Esc` | Close dialog |
-| `↑` / `↓` | Navigate dialog options |
-| `Enter` | Confirm upgrade |
+| `Esc` | Close dialog / Clear filter |
+| `/` | Start filter mode |
 | `R` | Refresh package data |
 | `S` | Toggle safe mode |
 | `Q` | Quit |
