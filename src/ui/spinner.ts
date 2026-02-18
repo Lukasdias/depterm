@@ -1,31 +1,30 @@
 import { TextRenderable, type BoxRenderable } from "@opentui/core";
-import spinners from "unicode-animations";
 import { renderer } from "./state.js";
 
 interface ActiveSpinner {
   textRenderable: TextRenderable;
   intervalId: ReturnType<typeof setInterval>;
   frameIndex: number;
-  frames: readonly string[];
+  frames: string[];
 }
 
 const activeSpinners = new Map<string, ActiveSpinner>();
 
+const HELIX_FRAMES = ["⣾", "⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽"];
+const SPINNER_INTERVAL = 80;
+
 export function createSpinner(
   id: string,
   parent: BoxRenderable,
-  spinnerName: keyof typeof spinners = "helix",
+  _spinnerName?: string,
   text = "",
   fg?: string
 ): TextRenderable {
-  const spinner = spinners[spinnerName];
-  if (!spinner) {
-    throw new Error(`Unknown spinner: ${spinnerName}`);
-  }
+  const frames = HELIX_FRAMES;
 
   const textRenderable = new TextRenderable(renderer, {
     id: `spinner-${id}`,
-    content: `${spinner.frames[0]} ${text}`,
+    content: `${frames[0]} ${text}`,
     fg: fg || "#FFCC00",
   });
 
@@ -34,11 +33,11 @@ export function createSpinner(
   const activeSpinner: ActiveSpinner = {
     textRenderable,
     intervalId: setInterval(() => {
-      activeSpinner.frameIndex = (activeSpinner.frameIndex + 1) % spinner.frames.length;
-      textRenderable.content = `${spinner.frames[activeSpinner.frameIndex]} ${text}`;
-    }, spinner.interval),
+      activeSpinner.frameIndex = (activeSpinner.frameIndex + 1) % frames.length;
+      textRenderable.content = `${frames[activeSpinner.frameIndex]} ${text}`;
+    }, SPINNER_INTERVAL),
     frameIndex: 0,
-    frames: spinner.frames,
+    frames,
   };
 
   activeSpinners.set(id, activeSpinner);
