@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.4
+## 2.0.0
 
 ### ✨ New Features
 
@@ -16,6 +16,10 @@
 ### 🐛 Bug Fixes
 
 - update references from pkg-tui to depterm in documentation and code
+
+### ♻️ Refactoring
+
+- remove unicode-animations dependency and implement custom spinner frames
 
 ### 📝 Other
 
